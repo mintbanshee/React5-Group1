@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 import type { Task } from "./types/Task";
+
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
+import Filter from "./components/Filter";
+
 import {
   addTask,
   deleteTask,
@@ -11,12 +14,29 @@ import {
   updateTask,
 } from "./services/taskService";
 
+// ========================================================
+// 📌 Main Application Component
+// ========================================================
+// This component handles:
+// - Firebase data loading
+// - Task CRUD operations
+// - Modal control
+// - Filtering logic
+// ========================================================
+
 export default function App() {
+
+  // ========================================================
+  // 📌 State Management
+  // ========================================================
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState<"All" | "Today" | "Upcoming" | "Completed">("All");
 
-  // Load tasks from Firebase on component mount
+  // ========================================================
+  // 📌 Load Tasks from Firebase
+  // ========================================================
   async function loadTasks() {
     const tasksFromFirebase = await getTasks();
     setTasks(tasksFromFirebase);
@@ -26,12 +46,36 @@ export default function App() {
     loadTasks();
   }, []);
 
-  // Handle adding or updating a task
+  // ========================================================
+  // 📌 Filter Logic (UI Filtering Only)
+  // ========================================================
+  const filteredTasks = tasks.filter((task) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    if (filter === "All") return true;
+
+    if (filter === "Today") {
+      return task.dueDate === today;
+    }
+
+    if (filter === "Upcoming") {
+      return task.dueDate > today && !task.isCompleted;
+    }
+
+    if (filter === "Completed") {
+      return task.isCompleted;
+    }
+
+    return true;
+  });
+
+  // ========================================================
+  // 📌 Add or Update Task
+  // ========================================================
   async function handleSubmitTask(task: Task) {
-    if (editingTask && editingTask.id) {
+    if (editingTask?.id) {
       await updateTask(editingTask.id, task);
       toast.success("Task updated!");
-      setEditingTask(null);
     } else {
       await addTask(task);
       toast.success("Task added!");
@@ -42,22 +86,20 @@ export default function App() {
     setEditingTask(null);
   }
 
-  // Handle deleting a task with confirmation and undo option
+  // ========================================================
+  // 📌 Delete Task
+  // ========================================================
   async function handleDelete(id: string) {
     const taskToDelete = tasks.find((task) => task.id === id);
-
     if (!taskToDelete) return;
 
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this task?",
-    );
-
+    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
     if (!confirmDelete) return;
 
     await deleteTask(id);
     await loadTasks();
 
-    // Show toast with undo option
+    // Undo option toast
     toast((t) => (
       <span>
         Task deleted!
@@ -68,6 +110,7 @@ export default function App() {
 
             await addTask(taskWithoutId as Task);
             await loadTasks();
+
             toast.dismiss(t.id);
             toast.success("Task restored!");
           }}
@@ -78,7 +121,9 @@ export default function App() {
     ));
   }
 
-  // Handle toggling task completion status
+  // ========================================================
+  // 📌 Toggle Completion Status
+  // ========================================================
   async function handleToggleComplete(task: Task) {
     if (!task.id) return;
 
@@ -87,21 +132,24 @@ export default function App() {
       isCompleted: !task.isCompleted,
     });
 
-    // Show toast based on new completion status
     toast.success(
-      task.isCompleted ? "Task marked incomplete!" : "Task completed!",
+      task.isCompleted ? "Task marked incomplete!" : "Task completed!"
     );
 
     await loadTasks();
   }
 
-  // Handle showing the modal for adding a new task
+  // ========================================================
+  // 📌 Open Add Task Modal
+  // ========================================================
   function handleAddTask() {
     setEditingTask(null);
     setShowModal(true);
   }
 
-  // Handle showing the modal for editing an existing task
+  // ========================================================
+  // 📌 Open Edit Task Modal
+  // ========================================================
   function handleEdit(task: Task) {
     setEditingTask(task);
     setShowModal(true);
@@ -109,19 +157,33 @@ export default function App() {
 
   return (
     <main className="container py-5">
-      {/*~*~*~*~*~* TOASTER *~*~*~*~*~*/}
+
+      {/* ========================================================
+          📌 Toast Notifications
+      ======================================================== */}
       <Toaster position="top-center" />
 
-      {/*~*~*~*~*~* FORM MODAL *~*~*~*~*~*/}
+      {/* ========================================================
+          📌 Filter Component
+      ======================================================== */}
+      <Filter
+        selectedFilter={filter}
+        onFilterChange={setFilter}
+      />
+
+      {/* ========================================================
+          📌 Task Modal (Add / Edit)
+      ======================================================== */}
       {showModal && (
         <div className="modal-backdrop-custom">
           <div className="modal-content-custom">
+
             <TaskForm
               onSubmitTask={handleSubmitTask}
               editingTask={editingTask}
             />
 
-      {/*~*~*~*~*~* CANCEL BUTTON *~*~*~*~*~*/}
+            {/* Cancel Button */}
             <button
               className="btn btn-outline-secondary w-100 mt-3"
               onClick={() => {
@@ -131,11 +193,14 @@ export default function App() {
             >
               Cancel
             </button>
+
           </div>
         </div>
       )}
 
-    {/*~*~*~*~*~* TASK LIST *~*~*~*~*~*/}
+      {/* ========================================================
+          📌 Task List (Filtered)
+      ======================================================== */}
       <TaskList
         tasks={tasks}
         onDelete={handleDelete}
@@ -143,6 +208,7 @@ export default function App() {
         onEdit={handleEdit}
         onAddTask={handleAddTask}
       />
+
     </main>
   );
 }
