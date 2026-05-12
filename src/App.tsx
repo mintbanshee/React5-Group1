@@ -1,122 +1,148 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
-function App() {
-  const [count, setCount] = useState(0)
+import type { Task } from "./types/Task";
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
+import {
+  addTask,
+  deleteTask,
+  getTasks,
+  updateTask,
+} from "./services/taskService";
+
+export default function App() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  // Load tasks from Firebase on component mount
+  async function loadTasks() {
+    const tasksFromFirebase = await getTasks();
+    setTasks(tasksFromFirebase);
+  }
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  // Handle adding or updating a task
+  async function handleSubmitTask(task: Task) {
+    if (editingTask && editingTask.id) {
+      await updateTask(editingTask.id, task);
+      toast.success("Task updated!");
+      setEditingTask(null);
+    } else {
+      await addTask(task);
+      toast.success("Task added!");
+    }
+
+    await loadTasks();
+    setShowModal(false);
+    setEditingTask(null);
+  }
+
+  // Handle deleting a task with confirmation and undo option
+  async function handleDelete(id: string) {
+    const taskToDelete = tasks.find((task) => task.id === id);
+
+    if (!taskToDelete) return;
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this task?",
+    );
+
+    if (!confirmDelete) return;
+
+    await deleteTask(id);
+    await loadTasks();
+
+    // Show toast with undo option
+    toast((t) => (
+      <span>
+        Task deleted!
+        <button
+          className="btn btn-sm btn-outline-primary ms-3"
+          onClick={async () => {
+            const { id, ...taskWithoutId } = taskToDelete;
+
+            await addTask(taskWithoutId as Task);
+            await loadTasks();
+            toast.dismiss(t.id);
+            toast.success("Task restored!");
+          }}
+        >
+          Undo
+        </button>
+      </span>
+    ));
+  }
+
+  // Handle toggling task completion status
+  async function handleToggleComplete(task: Task) {
+    if (!task.id) return;
+
+    await updateTask(task.id, {
+      ...task,
+      isCompleted: !task.isCompleted,
+    });
+
+    // Show toast based on new completion status
+    toast.success(
+      task.isCompleted ? "Task marked incomplete!" : "Task completed!",
+    );
+
+    await loadTasks();
+  }
+
+  // Handle showing the modal for adding a new task
+  function handleAddTask() {
+    setEditingTask(null);
+    setShowModal(true);
+  }
+
+  // Handle showing the modal for editing an existing task
+  function handleEdit(task: Task) {
+    setEditingTask(task);
+    setShowModal(true);
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="container py-5">
+      {/*~*~*~*~*~* TOASTER *~*~*~*~*~*/}
+      <Toaster position="top-center" />
 
-      <div className="ticks"></div>
+      {/*~*~*~*~*~* FORM MODAL *~*~*~*~*~*/}
+      {showModal && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-content-custom">
+            <TaskForm
+              onSubmitTask={handleSubmitTask}
+              editingTask={editingTask}
+            />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/*~*~*~*~*~* CANCEL BUTTON *~*~*~*~*~*/}
+            <button
+              className="btn btn-outline-secondary w-100 mt-3"
+              onClick={() => {
+                setShowModal(false);
+                setEditingTask(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    {/*~*~*~*~*~* TASK LIST *~*~*~*~*~*/}
+      <TaskList
+        tasks={tasks}
+        onDelete={handleDelete}
+        onToggleComplete={handleToggleComplete}
+        onEdit={handleEdit}
+        onAddTask={handleAddTask}
+      />
+    </main>
+  );
 }
-
-export default App
