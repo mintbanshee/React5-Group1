@@ -18,33 +18,40 @@ export default function TaskList({
   onEdit,
   onAddTask,
 }: Props) {
-  const hasCompleted = tasks.some((task) => task.isCompleted);
-
   return (
-    <section className="container py-4">
+    <section className="py-2">
 
-    {/*~*~*~*~*~* TOP BANNER *~*~*~*~*~*/}
-      <div className="p-5 mb-4 bg-success rounded-3 text-center shadow-sm">
-        <h1 className="mb-4 text-dark">Your Study Planner</h1>
-        <p className="lead mb-4">
-          A little organization today makes tomorrow feel lighter.
+      {/* ============================================
+          📌 HERO BANNER
+          ============================================ */}
+      <div id="home" className="hero-banner">
+        <span className="hero-eyebrow">📘 Task & Study Planner</span>
+
+        <h1>Plan your studies with ease</h1>
+
+        <p>
+          Organize assignments, track deadlines, and stay on top
+          of your priorities — all in one calm, focused space.
         </p>
 
-      {/*~*~*~*~*~* ADD TASK BUTTON *~*~*~*~*~*/}
-        <div className="d-flex justify-content-center mb-4">
-          <button className="btn btn-primary" onClick={onAddTask}>
-            Add Task
-          </button>
-        </div>
+        <button className="btn btn-primary hero-add-btn" onClick={onAddTask}>
+          + Add New Task
+        </button>
       </div>
 
-      {/*~*~*~*~*~* TASK CARDS *~*~*~*~*~*/}
+      {/* ============================================
+          📌 TASK CARDS GRID
+          ============================================ */}
       {tasks.length === 0 ? (
-        <p className="text-center text-muted">No tasks added yet.</p>
+        <div className="empty-state">
+          <div className="empty-state-icon">📝</div>
+          <h4>No tasks here yet</h4>
+          <p>Add your first study task to get started.</p>
+        </div>
       ) : (
         <div className="row g-4">
           {tasks.map((task) => (
-            <div className="col-md-4" key={task.id}>
+            <div className="col-12 col-sm-6 col-lg-4" key={task.id}>
               <TaskCard
                 task={task}
                 onDelete={onDelete}

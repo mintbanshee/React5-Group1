@@ -32,39 +32,19 @@ export default function Filter({
   ];
 
   return (
-    <section className="mb-4">
+    <section className="filter-section">
 
-      {/* ========================================================
-          📌 Section Title
-      ======================================================== */}
-      <h3 className="text-center mb-3">
-        Filter Tasks
-      </h3>
+      {/* Section Title */}
+      <h3>Filter Tasks</h3>
 
-      {/* ========================================================
-          📌 Filter Button Group
-      ======================================================== */}
-      <div className="d-flex flex-wrap gap-2 justify-content-center">
-
-        {/* ========================================================
-            📌 Render Filter Buttons Dynamically
-        ======================================================== */}
+      {/* Filter chips */}
+      <div className="filter-chips">
         {filters.map((filterOption) => (
           <button
             key={filterOption}
-
-            // ========================================================
-            // 📌 Active state styling for selected filter
-            // ========================================================
-            className={`btn ${
-              selectedFilter === filterOption
-                ? "btn-primary"
-                : "btn-outline-primary"
+            className={`filter-chip ${
+              selectedFilter === filterOption ? "active" : ""
             }`}
-
-            // ========================================================
-            // 📌 Notify parent (App.tsx) when filter changes
-            // ========================================================
             onClick={() => onFilterChange(filterOption)}
           >
             {filterOption}

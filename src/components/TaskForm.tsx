@@ -41,6 +41,13 @@ export default function TaskForm({ onSubmitTask, editingTask }: Props) {
     return lowPriorityImage;
   }
 
+  // Map priority to CSS class for preview
+  function getPriorityClass(priority: Task["priority"]) {
+    if (priority === "High") return "priority-high";
+    if (priority === "Medium") return "priority-medium";
+    return "priority-low";
+  }
+
   // Handle input changes for text fields
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -71,75 +78,73 @@ export default function TaskForm({ onSubmitTask, editingTask }: Props) {
   }
 
   return (
-    <section className="container py-4">
-      <div
-        className="card p-4 shadow-sm rounded-3 mx-auto"
-        style={{ maxWidth: "650px" }}
-      >
-        {/*~*~*~*~*~* FORM TITLE DEPENDING ON ADD OR EDIT *~*~*~*~*~*/}
-        <h2 className="mb-4 text-center text-dark">
-          {editingTask ? "Edit Task" : "Add Task"}
-        </h2>
+    <div className="task-form-wrap">
 
-        {/*~*~*~*~*~* FORM FIELDS *~*~*~*~*~*/}
-        <form onSubmit={handleSubmit}>
-          <input
-            className="form-control mb-3"
-            name="title"
-            type="text"
-            placeholder="Task Title"
-            value={task.title}
-            onChange={handleChange}
-            required
-          />
+      {/* Form title */}
+      <h2>{editingTask ? "Edit Task" : "Add a new task"}</h2>
 
-          <input
-            className="form-control mb-3"
-            name="subject"
-            type="text"
-            placeholder="Subject"
-            value={task.subject}
-            onChange={handleChange}
-            required
-          />
+      {/* Form */}
+      <form onSubmit={handleSubmit}>
 
-          <input
-            className="form-control mb-3"
-            name="dueDate"
-            type="date"
-            value={task.dueDate}
-            onChange={handleChange}
-            required
-          />
+        {/* Title */}
+        <label className="form-label-soft">Task Title</label>
+        <input
+          className="form-control mb-3"
+          name="title"
+          type="text"
+          placeholder="e.g. Finish React assignment"
+          value={task.title}
+          onChange={handleChange}
+          required
+        />
 
-          <select
-            className="form-control mb-3"
-            name="priority"
-            value={task.priority}
-            onChange={handlePriorityChange}
-            required
-          >
-            <option value="Low">Low Priority</option>
-            <option value="Medium">Medium Priority</option>
-            <option value="High">High Priority</option>
-          </select>
+        {/* Subject */}
+        <label className="form-label-soft">Subject</label>
+        <input
+          className="form-control mb-3"
+          name="subject"
+          type="text"
+          placeholder="e.g. Web Development"
+          value={task.subject}
+          onChange={handleChange}
+          required
+        />
 
-          {/*~*~*~*~*~* PRIORITY IMAGE BASED ON SELECTION *~*~*~*~*~*/}
-          {task.imageUrl && (
-            <img
-              src={task.imageUrl}
-              alt={`${task.priority} priority`}
-              className="img-fluid rounded mb-3 w-100"
-              style={{ maxHeight: "150px", objectFit: "cover" }}
-            />
-          )}
+        {/* Due date */}
+        <label className="form-label-soft">Due Date</label>
+        <input
+          className="form-control mb-3"
+          name="dueDate"
+          type="date"
+          value={task.dueDate}
+          onChange={handleChange}
+          required
+        />
 
-          {/*~*~*~*~*~* SUBMIT BUTTON *~*~*~*~*~*/}
-          <button type="submit" className="btn btn-primary w-100">
-            {editingTask ? "Update Task" : "Add Task"}
-          </button>
-        </form>
-      </div>
-    </section>
+        {/* Priority */}
+        <label className="form-label-soft">Priority</label>
+        <select
+          className="form-select mb-1"
+          name="priority"
+          value={task.priority}
+          onChange={handlePriorityChange}
+          required
+        >
+          <option value="Low">Low Priority</option>
+          <option value="Medium">Medium Priority</option>
+          <option value="High">High Priority</option>
+        </select>
+
+        {/* Priority gradient preview */}
+        <div className={`priority-preview ${getPriorityClass(task.priority)}`}>
+          <span>{task.priority} Priority</span>
+        </div>
+
+        {/* Submit */}
+        <button type="submit" className="btn btn-primary w-100">
+          {editingTask ? "Update Task" : "Add Task"}
+        </button>
+      </form>
+    </div>
   );
 }

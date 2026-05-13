@@ -20,6 +20,7 @@ import TaskList from "./components/TaskList";
 import Filter from "./components/Filter";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import BackToTop from "./components/BackToTop";
 
 // Firebase service functions
 import {
@@ -490,6 +491,9 @@ export default function App() {
         </section>
 
       </main>
+
+       {/* Floating "Back to Top" button */}
+      <BackToTop />
 
       {/* Footer Component */}
       <Footer />

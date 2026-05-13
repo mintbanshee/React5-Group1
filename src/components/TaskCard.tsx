@@ -9,61 +9,109 @@ type Props = {
   onEdit: (task: Task) => void;
 };
 
-export default function TaskCard({ task, onDelete, onToggleComplete, onEdit }: Props) {
-  return (
-      <div className="card h-100 shadow-sm rounded-2">
-        
-        {/*~*~*~*~*~* PRIORITY IMAGE *~*~*~*~*~*/}
-        <img
-          src={task.imageUrl}
-          className="card-img-top"
-          alt={task.priority}
-          style={{ height: "200px", objectFit: "cover" }}
-          onError={(e) => {
-            e.currentTarget.src = "https://placehold.co/600x400?text=Task";
-          }}
-        />
+// Helper to format the due date in a friendly way
+function formatDueDate(dueDate: string): string {
+  if (!dueDate) return "";
 
-        {/*~*~*~*~*~* TOGGLE COMPLETED *~*~*~*~*~*/}
-        <div className={`card-body ${task.isCompleted ? "opacity-50" : ""}`}>
-          <div className="form-check form-switch mb-3">
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const due = new Date(dueDate + "T00:00:00");
+  const diffMs = due.getTime() - today.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Due today";
+  if (diffDays === 1) return "Due tomorrow";
+  if (diffDays === -1) return "Overdue by 1 day";
+  if (diffDays < -1) return `Overdue by ${Math.abs(diffDays)} days`;
+  if (diffDays > 1 && diffDays <= 7) return `Due in ${diffDays} days`;
+
+  // Fall back to formatted date for further dates
+  return due.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: due.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+  });
+}
+
+export default function TaskCard({
+  task,
+  onDelete,
+  onToggleComplete,
+  onEdit,
+}: Props) {
+  // Map priority to CSS modifier
+  const priorityClass =
+    task.priority === "High"
+      ? "priority-high"
+      : task.priority === "Medium"
+        ? "priority-medium"
+        : "priority-low";
+
+  return (
+    <div className={`task-card ${task.isCompleted ? "is-completed" : ""}`}>
+
+      {/* Priority header strip with badge */}
+      <div className={`task-card-header ${priorityClass}`}>
+        <span className={`priority-badge ${priorityClass}`}>
+          <span className="badge-dot"></span>
+          {task.priority} Priority
+        </span>
+      </div>
+
+      {/* Card body */}
+      <div className="task-card-body">
+
+        {/* Title row with completion toggle */}
+        <div className="task-card-top">
+          <h5 className="task-card-title">{task.title}</h5>
+
+          <div className="form-check form-switch task-card-toggle">
             <input
               className="form-check-input"
               type="checkbox"
               role="switch"
               checked={task.isCompleted}
               onChange={() => onToggleComplete(task)}
+              aria-label="Toggle task completion"
             />
-            <h5
-              className={`card-title ${task.isCompleted ? "text-decoration-line-through text-muted" : ""}`}
-            >
-              {task.title}
-            </h5>
-          </div>
-
-          {/*~*~*~*~*~* CARD FOOTER WITH BUTTONS *~*~*~*~*~*/}
-          <div
-            className={`card-footer bg-white ${task.isCompleted ? "opacity-50" : ""}`}
-          >
-            {task.id && (
-              <>
-                <button
-                  className="btn btn-outline-primary w-100 mb-2"
-                  onClick={() => onEdit(task)}
-                >
-                  Edit
-                </button>
-
-                <button
-                  className="btn btn-outline-danger w-100"
-                  onClick={() => onDelete(task.id!)}
-                >
-                  Delete
-                </button>
-              </>
-            )}
           </div>
         </div>
+
+        {/* Subject + Due date meta */}
+        <div className="task-card-meta">
+          <div className="task-meta-row">
+            <span className="meta-icon">📚</span>
+            <span className="task-subject-tag">{task.subject}</span>
+          </div>
+
+          {task.dueDate && (
+            <div className="task-meta-row">
+              <span className="meta-icon">📅</span>
+              <span>{formatDueDate(task.dueDate)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Edit / Delete actions */}
+        {task.id && (
+          <div className="task-card-actions">
+            <button
+              className="btn btn-outline-primary"
+              onClick={() => onEdit(task)}
+            >
+              Edit
+            </button>
+
+            <button
+              className="btn btn-outline-danger"
+              onClick={() => onDelete(task.id!)}
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
+    </div>
   );
 }
