@@ -5,7 +5,7 @@ import Navigation from "./Navigation";
 function Header() {
   return (
     // Header section with Bootstrap styling
-    <header className="bg-dark text-white py-3 shadow-sm">
+    <header className="bg-dark text-white py-3 shadow-sm sticky-top custom-header">
       
       {/* Bootstrap container for layout alignment */}
       <div className="container d-flex justify-content-between align-items-center">
