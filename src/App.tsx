@@ -202,7 +202,7 @@ export default function App() {
           📌 Task List (Filtered)
       ======================================================== */}
       <TaskList
-        tasks={tasks}
+        tasks={filteredTasks}
         onDelete={handleDelete}
         onToggleComplete={handleToggleComplete}
         onEdit={handleEdit}
