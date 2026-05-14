@@ -61,6 +61,30 @@ React5-Group1/
 - **npm** (comes bundled with Node)
 - A **Firebase project** with Firestore enabled
 
+## Demo Video
+
+
+https://github.com/user-attachments/assets/17ca0b67-2260-4afd-8ce7-868712ef1764
+
+
+
+## Screenshots
+
+<img width="1743" height="964" alt="LightMode" src="https://github.com/user-attachments/assets/c84be191-bee2-4423-a96c-2fdf886d24ee" />
+
+<img width="1739" height="962" alt="Nav" src="https://github.com/user-attachments/assets/e16c515e-6f0b-4199-9590-f4ee12070a78" />
+
+<img width="1730" height="982" alt="Filter" src="https://github.com/user-attachments/assets/05fade8c-28cd-4049-87e3-1260b54f781f" />
+
+<img width="1729" height="978" alt="Add" src="https://github.com/user-attachments/assets/0f564968-ac12-4652-8f75-ed9d213019e9" />
+
+<img width="1729" height="964" alt="Edit" src="https://github.com/user-attachments/assets/13c2ebf8-69db-412a-bf2a-71c662091803" />
+
+<img width="1549" height="926" alt="Undo" src="https://github.com/user-attachments/assets/bb8afdc3-0cd9-407d-8f5b-da1ebaeb4d0b" />
+
+<img width="1456" height="975" alt="Restored" src="https://github.com/user-attachments/assets/b77a87e5-34c2-479b-9ffd-01987d7fd125" />
+
+
 ## Getting Started
 
 ### 1. Clone the repository
